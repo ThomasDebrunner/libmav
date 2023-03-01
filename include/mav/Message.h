@@ -15,28 +15,28 @@
 namespace mav {
 
     using NativeVariantType = std::variant<
-            char,
-            int8_t,
-            uint8_t,
-            int16_t,
-            uint16_t,
-            int32_t,
-            uint32_t,
-            int64_t,
-            uint64_t,
-            float,
-            double,
             std::string,
-            std::vector<int8_t>,
-            std::vector<uint8_t>,
-            std::vector<int16_t>,
-            std::vector<uint16_t>,
-            std::vector<int32_t>,
-            std::vector<uint32_t>,
-            std::vector<int64_t>,
             std::vector<uint64_t>,
+            std::vector<int64_t>,
+            std::vector<uint32_t>,
+            std::vector<int32_t>,
+            std::vector<uint16_t>,
+            std::vector<int16_t>,
+            std::vector<uint8_t>,
+            std::vector<int8_t>,
+            std::vector<double>,
             std::vector<float>,
-            std::vector<double>
+            uint64_t,
+            int64_t,
+            uint32_t,
+            int32_t,
+            uint16_t,
+            int16_t,
+            uint8_t,
+            int8_t,
+            char,
+            double,
+            float
     >;
 
 
@@ -190,12 +190,17 @@ namespace mav {
             return _source_partner;
         }
 
+        Message& setFromNativeTypeVariant(const std::string &field_key, const NativeVariantType &v) {
+            std::visit([this, &field_key](auto&& arg) {
+                this->set(field_key, arg);
+            }, v);
+            return *this;
+        }
+
         Message& set(std::initializer_list<_InitPairType> init) {
             for (const auto &pair : init) {
                 const auto &key = pair.first;
-                std::visit([this, &key](auto&& arg) {
-                    this->set(key, arg);
-                }, pair.second);
+                setFromNativeTypeVariant(key, pair.second);
             }
             return *this;
         }
